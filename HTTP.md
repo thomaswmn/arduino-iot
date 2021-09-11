@@ -1,0 +1,61 @@
+# HTTP
+
+HTTP ist die Abkürzung für HyperText Transport Protocol. Es wurde urspünglich zur Übertragung von Webseiten entwickelt. Mittlerweile wird es aber für viele weitere Zwecke eingesetzt.
+
+Wir verwenden hier die Version 1.1. Diese ist formal in [RFC 2616](https://datatracker.ietf.org/doc/html/rfc2616) spezifiziert. Einen ersten Überblick liefert auch die [Wikipedia](https://de.wikipedia.org/wiki/Hypertext_Transfer_Protocol). Wir benötigen hier aber nur einen kleinen Teil dessen, was das Protokoll kann. Dieser wird im Folgenden erklärt.
+
+## Anfrage
+
+Im Protokoll spricht ein "Client" (hier unser Arduino) mit einem "Server" (hier unser Setup in der Public Cloud). Bei HTTP beginnt immer der Client die Kommunikation mit einer Anfrage. Diese wird als Text übertragen. Die ersten Zeilen werden vom HTTP Protokoll definiert. Nach einer Leerzeile folgt ein beliebier Inhalt. Am Ende jeder Zeilte folgen die zwei Zeichen "Carriage Return" (`"\r"`) und "Line Feed" (`"\n"`).
+
+Im folgenden Beispiel schickt der Client ein einfaches JSON Dokument an den Server.
+
+```
+POST /devices/test-dev-id/messages/events?api-version=2020-03-13 HTTP/1.1
+User-Agent: curl/7.29.0
+Host: test-bosch-sfp-kos.azure-devices.net
+Accept: */*
+Content-Type: application/json
+Authorization: SharedAccessSignature ...
+Content-Length: 12
+
+{"test":"1"}
+```
+
+Kurze Erklärung der Zeilen
+* `POST /device/... HTTP/1.1`
+    * `POST` ist die HTTP Methode. `POST` bedeutet, dass Daten gesendet werden ("upload"). Würde nur etwas abgefragt, würde man `GET` verwenden.
+    * `/device/... ` ist der Pfad des Dokuments auf dem Server, für das die Daten bestimmt sind. Hier nicht wirklich ein Dokument, sondern stattdessen nutzt der Server diesen Teil, um zwischen verschiedenen Geräten (hier `test-dev-id`) und Funktionen zu unterscheiden.
+    * `HTTP/1.1` ist die verwendete Version des Protokolls. Die wird hier mitgeschickt, damit der Server die folgenden Zeilen richtig interpretieren kann.
+* `User-Agent:` gibt an, welche Software der Client verwendet (hier `curl`).
+* `Host:` ist der Name des Servers, an den diese Anfrage gesendet wird. Manchmal übernimmt ein Server Dienst für mehrere solche Namen. Durch diese Angabe kann er die Anfragen unterscheiden.
+* `Accept:` definiert, welche Datenformate dieser Client für den Inhalt akzeptiert. `*/*` bedeutet, dass alle Formate möglich sind.
+* `Content-Type:` ist das Datenformat, das der Client zum Server schickt. In unserem Fall senden wir ein JSON Dokument.
+* `Authorization:` ist eine Art Passwort. Der Server verarbeitet die Anfrage nur, wenn hier ein gültiger Text gesendet wird.
+* `Content-Length:` ist die Länge des Dokuments, das der Client zum Server schickt (in Bytes).
+* Die Leerzeile markiert das Ende der HTTP Protokoll-Informationen. Nach der Leerzeile folgt das Dokument.
+* Die Zeile `{"test":"1"}` ist das Dokument, das der Client zum Server schickt. Der String ist 12 Zeichen lang.
+
+## Antwort
+Sobald der Server die angekündigten 12 Bytes empfangen hat, wird die Anfrage bearbeitet. Die Verbindung bleibt dabei offen. Dann antwortet der Server, z.B. so:
+
+```
+HTTP/1.1 204 No Content
+Content-Length: 0
+Vary: Origin
+Server: Microsoft-HTTPAPI/2.0
+x-ms-request-id: f5116577-0a75-40db-9824-ee0385cbaa45
+Date: Sat, 11 Sep 2021 07:17:35 GMT
+
+```
+
+Erklärung
+* `HTTP/1.1 ...`
+    * `HTTP/1.1` ist wieder die Protokoll-Version. Der Server hat also die vom Client gesendete Versionsnummer verstanden und antwortet entsprechend.
+    * `204` ist der Status-Code. Zahlen aus dem Bereich 200-299 kennzeichnen Erfolg. Zahlen im Bereich 400-499 bedeuten, dass der Client etwas falsch gemacht hat (z.B. eine ungültige Anfrage, falsches Passwort, ...). Der Bereich 500-599 steht für Fehler auf der Seite des Servers.
+    * `No Content` ist eine weitere Erklärung zum Status. In diesem Fall: Alles OK, aber der Server sendet kein Dokument zurück.
+* `Content-Length:` ist die Länge des vom Server gesendeten Dokuments.
+* `Vary:` ist für Proxy-Server relevant.
+* `Server:` gibt an, welche Software auf dem Server läuft.
+* `x-ms-request-id:` Eindeutige ID für diese Anfrage und Antwort. Diese findet man z.B. auch in Logs auf dem Server.
+* `Date:` Datum und Uhrzeit, zu der der Server die Antwort versendet hat.
