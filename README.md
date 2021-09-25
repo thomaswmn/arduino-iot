@@ -2,6 +2,7 @@
 
 ![Protokoll-Stapel](ProtokollStapel.png)
 
+* [How to Start](HowToStart.md)
 * [JSON](./JSON.md)
 * [HTTP](./HTTP.md)
 * [ESP8266](./ESP8266.md)
@@ -9,11 +10,7 @@
 
 * Arduino "Progmem"
 
-* SoftSerial
-    * warum?
-    * Header-include und Definition
-    * Setup
-    * Senden und empfangen
+* SoftSerial --> siehe Abschnitt ESP8266
 
 * Cloud-Umgebung
     * grober Aufbau?

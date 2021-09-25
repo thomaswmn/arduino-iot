@@ -26,6 +26,11 @@ Datenübertragung
 * `AT+CIPCLOSE` --> beendet eine bestehende TCP-Verbindung
 * `AT+CIPSEND=123` --> Beginnt die Datenübertragung. Hier werden 123 Bytes gesendet. Nach kurzer Wartezeit können die Daten geschickt werden. Sobald die angekündigte Anzahl Bytes übertragen wurden, ist das Modul wieder bereit für neue AT-Kommandos.
 
+Netzwerk Infos
+* `AT+CWLAP` --> zeigt eine Liste aller gefundenen WLAN Access Points an
+* `AT+CWJAP_CUR?` --> zeigt an, zu welchem WLAN Netz das Modul verbunden ist
+* `AT+CIFSR` --> zeigt die IP-Adresse und die MAC-Adresse des ESP8266 im WLAN an
+* `AT+PING=<IP>` --> sendet ein "ping" Paket an die angegebene Adresse. Es werden auch Host-Namen unterstützt.
 
 ## Datenübertragung
 

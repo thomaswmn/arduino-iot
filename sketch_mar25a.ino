@@ -141,6 +141,7 @@ void transmit_serial(const char * data) {
  * Therefore, it has to be copied to RAM first, before it can be transmitted. 
  * To do so, we use this loop with a small buffer. This avoids overflow of the 
  * rather small memory of the Arduino.
+ * FIXME: could also read and print byte by byte - should be easier?
  */
 #define HEADER_BUFSIZE 16
 void transmit_header() {
