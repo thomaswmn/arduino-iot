@@ -25,42 +25,101 @@
 #define HTTP_HEADER_3 "User-Agent: Arduino\r\n"
 #define HTTP_HEADER_4 "Accept: */*\r\n"
 #define HTTP_HEADER_5 "Content-Type: application/json\r\n"
-#define HTTP_HEADER_6 "Authorization: SharedAccessSignature sr=test-bosch-sfp-kos.azure-devices.net%2Fdevices%2Ftest-dev-id&sig=ZGo3kDxXM%2Bdrj49ZiIlbXOJNVxWQpDF0IdWEhvrZW3M%3D&se=1618591213\r\n"
+#define HTTP_HEADER_6 "Authorization: SharedAccessSignature sr=test-bosch-sfp-kos.azure-devices.net%2Fdevices%2Ftest-dev-id&sig=XsqoF%2FnRw2LNCSldqOdZtAENokoMv4bWmrJdQRoYfD0%3D&se=1621203903\r\n"
 
 const char http_header[] PROGMEM = HTTP_HEADER_1 HTTP_HEADER_2 HTTP_HEADER_3 HTTP_HEADER_4 HTTP_HEADER_5 HTTP_HEADER_6; 
 #define HTTP_HEADER_LEN (strlen_P(http_header))
 
-//#define CIPSTART "AT+CIPSTART=\"SSL\",\"test-bosch-sfp-kos.azure-devices.net\",443\r\n"
-#define CIPSTART "AT+CIPSTART=\"TCP\",\"192.168.3.192\",8080\r\n"
+#define CIPSTART "AT+CIPSTART=\"SSL\",\"test-bosch-sfp-kos.azure-devices.net\",443\r\n"
+//#define CIPSTART "AT+CIPSTART=\"TCP\",\"192.168.3.192\",8080\r\n"
 
 
-#define USE_SOFT_SERIAL
 
-#ifdef USE_SOFT_SERIAL
+// how often to send data to the cloud?
+#define TRANSMIT_INTERVAL_MILLIS 10000
+
+
+// when we did not get a "good" status for this time, we blink "error"
+#define STATUS_WAIT_MILLIS 20000
+#define STATUS_LED_PIN 13
+
+
+// define the software serial interface
 #define SOFTSERIAL_RX_PIN 2
 #define SOFTSERIAL_TX_PIN 3
 //#define _SS_MAX_RX_BUFF 256 // RX buffer size - default 64
 #include "SoftwareSerial.h"
 SoftwareSerial softSerial(SOFTSERIAL_RX_PIN, SOFTSERIAL_TX_PIN); // RX, TX
-#endif
 
+// the receive buffer (to accumulate received data)
+#define REC_BUFLEN 256
+char rec_buf[REC_BUFLEN+1] = {0}; // make the buffer 1 char larger, initialize with 0, so that strstr() comparison never fails
+int rec_buf_idx = 0;
 
+// last timestamp we detected an HTTP 2xx status code
+long last_http_ok_time = 0;
+
+/* 
+ *  called whenever a \n or a \r has been received, or when the buffer needs to be flushed
+ *  when this is called, the buffer does not contain the respective \n or \r
+ *  returns true when we can stop waiting for more received data
+ *  
+ *  parameter untilOK --> set done = true if the line starts with "OK"
+ *  parameter untilErr --> set done = true if the line starts with "ERROR"
+*/
+bool process_rec_buf(bool untilOK, bool untilErr) {
+  bool done = false;
+  if(rec_buf_idx == 0) {
+    // skip all checks on empty buf
+  } else if(untilOK && strncmp(rec_buf, "OK", 2) == 0) {
+    //Serial.println("received \"OK\" --> done");
+    done = true;
+  } else if(untilErr && strncmp(rec_buf, "ERROR", 5) == 0) {
+    //Serial.println("received \"ERROR\" --> done");
+    done = true;
+  } else if (strncmp(rec_buf, "+IPD", 4) == 0) {
+    // this is the first line of the HTTP response, where the ESP8266 sends +IPD...
+    // find the HTTP return code
+    char* ptr = strstr(rec_buf, "HTTP/1.1");
+    int statuscode = atoi(ptr+9);
+    if(statuscode >= 200 && statuscode <300) {
+      // this is the "OK" range
+      last_http_ok_time = millis();
+    }
+  } 
+  rec_buf_idx=0;
+  return done;  
+}
+
+void receive_serial_param(long duration, bool untilOK, bool untilErr) {
+  long end = millis() + duration;
+  char val;
+  bool done = false;
+  do {
+    while (softSerial.available()) {
+      val = softSerial.read();
+      // debug-copy to serial
+      Serial.write(val);
+      // check the received data
+      if(val == '\r' || val == '\n') {
+        // process buffer when the line ends
+        done = process_rec_buf(untilOK, untilErr);
+      } else if(rec_buf_idx < REC_BUFLEN - 1) {
+        // append to buffer (if space left)
+        rec_buf[rec_buf_idx++] = val;
+      }
+    }
+  } while(millis() < end && done == false);
+  
+  // now flush the buffer
+  process_rec_buf(false, false);
+}
 
 void receive_serial(long duration) {
-  long end = millis() + duration;
-  do {
-#ifdef USE_SOFT_SERIAL
-    while (softSerial.available()) {
-      char val = softSerial.read();
-      Serial.write(val);
-    }
-#else
-    while (Serial.available()) {
-      char val;
-      val = Serial.read();
-    }
-#endif
-  } while(millis() < end);
+  receive_serial_param(duration, true, true);
+}
+void receive_serial_uncond(long duration) {
+  receive_serial_param(duration, false, false);
 }
 
 
@@ -72,9 +131,7 @@ void transmit_serial(const char * data) {
   }
   Serial.print(data);
 #endif
-#ifdef USE_SOFT_SERIAL
   softSerial.print(data);
-#endif
   receive_serial(1);
 }
 
@@ -102,10 +159,8 @@ void transmit_header() {
     }
     written = Serial.write(buf, batch);
 #endif
-#ifdef USE_SOFT_SERIAL
     written = softSerial.write(buf, batch);
     delay(1); // just to be sure...
-#endif
     ptr += written;
     todo -= written;
   }
@@ -128,11 +183,13 @@ void ssl_transmit(char * data) {
   // 2x \r\n - newline before data and one after data
   totalLength+=4; 
 
-  // start TCP / SSL connection
+  // stop existing TCP connection (just try it - in case there is one...)
   transmit_serial("AT+CIPCLOSE\r\n");
   receive_serial(2000);
+  
+  // start TCP / SSL connection
   transmit_serial(CIPSTART);
-  receive_serial(2000);
+  receive_serial(5000); // wait 5s to establish connection
 
   // start transmitting data
   char buffer[32];
@@ -155,11 +212,11 @@ void ssl_transmit(char * data) {
   // send the content
   transmit_serial(data);
   transmit_serial("\r\n");
-  receive_serial(1000);
+  receive_serial(5000);
 
-  // close the connection
+  // close the connection (in case of errors, it is closed by the server; in case all is OK, it is not)
   transmit_serial("AT+CIPCLOSE\r\n");
-  receive_serial(10);
+  receive_serial(100);
 }
 
 
@@ -170,40 +227,45 @@ void setup() {
   Serial.begin(9600);
   Serial.println("startup...");
 
-#ifdef USE_SOFT_SERIAL
-  // configure ESP8266 to use 9600 baud (higher rates not compatible with SoftwareSerial)
+  // set up LED pin
+  pinMode(STATUS_LED_PIN, OUTPUT);
+
+  // configure ESP8266 to use 9600 baud (higher rates not compatible with SoftwareSerial?)
   //softSerial.begin(115200);
   //softSerial.print("AT+CIOBAUD=9600\r\n");
   pinMode(SOFTSERIAL_RX_PIN, INPUT);
   pinMode(SOFTSERIAL_TX_PIN, OUTPUT);
   softSerial.begin(9600);
-#endif
 
   receive_serial(2000);
   transmit_serial("AT\r\n"); // should return "OK"
   receive_serial(2000);
+  transmit_serial("AT+RST\r\n"); // restart the module
+  receive_serial_uncond(10000); // wait unconditionally, otherwise it just get's errors for the following commands
   transmit_serial("AT+GMR\r\n"); // returns version information
   receive_serial(10000);
   transmit_serial("AT+CWMODE?\r\n"); // ensure that mode is "station"
   receive_serial(100);
   transmit_serial("AT+CIPSSLSIZE=4096\r\n"); // set SSL buffer to 4kiB (otherwise we will get errors later)
   receive_serial(100);
+  transmit_serial("AT+CIPRECVMODE=1\r\n"); // set receive mode to active (module does not buffer)
+  receive_serial(100);
   //transmit_serial("ATE0\r\n"); // disable echo
   //receive_serial(100);
 }
 
 
+long last_transmit_time = 0;
 
-void loop() {
+void transmit_sensor_data() {
+  long now = millis();
   
-#ifdef SERIAL_TO_SOFTSERIAL
-  // if enabled, copy data the Arduino receives to the ESP8266 module (for testing)
-  while (Serial.available()) {
-    char val = Serial.read();
-    softSerial.write(val);
-  }
-#endif
+  if(now - last_transmit_time < TRANSMIT_INTERVAL_MILLIS) 
+    return; // skip the transmit and wait another round
 
+  // as we transmit now, update the timestamp
+  last_transmit_time = now;
+  
   // prepare the data to be transmitted as JSON
   char buffer[20];
   memset(buffer,0,sizeof(buffer));
@@ -212,8 +274,27 @@ void loop() {
   // now send it to the Cloud
   ssl_transmit(buffer);
 
+}
+
+void update_status_led() {
+  long now = millis();
+  bool state_ok = (now - last_http_ok_time < STATUS_WAIT_MILLIS);
+  if(state_ok) {
+    digitalWrite(STATUS_LED_PIN, now % 2000 < 1000 ? LOW : HIGH);
+    //Serial.println("status: OK");
+  } else {
+    // blink with 500ms period
+    digitalWrite(STATUS_LED_PIN, now % 500 < 250 ? LOW : HIGH);
+    //Serial.println("status: err");
+  }
+}
+
+void loop() {
+ 
+  transmit_sensor_data();
+
+  update_status_led();
+
   // some delays
-  receive_serial(10000);
-  transmit_serial("AT+CIPSTATUS\r\n");
-  receive_serial(1000);
+  receive_serial_uncond(10);
 }
