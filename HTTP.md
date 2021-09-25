@@ -4,9 +4,11 @@ HTTP ist die Abkürzung für HyperText Transport Protocol. Es wurde urspünglich
 
 Wir verwenden hier die Version 1.1. Diese ist formal in [RFC 2616](https://datatracker.ietf.org/doc/html/rfc2616) spezifiziert. Einen ersten Überblick liefert auch die [Wikipedia](https://de.wikipedia.org/wiki/Hypertext_Transfer_Protocol). Wir benötigen hier aber nur einen kleinen Teil dessen, was das Protokoll kann. Dieser wird im Folgenden erklärt.
 
-## Anfrage
+Im Protokoll spricht ein "Client" (hier unser Arduino) mit einem "Server" (hier unser Setup in der Public Cloud). Bei HTTP beginnt immer der Client die Kommunikation mit einer Anfrage, der Server beantwortet diese. 
 
-Im Protokoll spricht ein "Client" (hier unser Arduino) mit einem "Server" (hier unser Setup in der Public Cloud). Bei HTTP beginnt immer der Client die Kommunikation mit einer Anfrage. Diese wird als Text übertragen. Die ersten Zeilen werden vom HTTP Protokoll definiert. Nach einer Leerzeile folgt ein beliebier Inhalt. Am Ende jeder Zeilte folgen die zwei Zeichen "Carriage Return" (`"\r"`) und "Line Feed" (`"\n"`).
+Anfrage und Antwort werden als Text übertragen. Die ersten Zeilen (der Header) werden vom HTTP Protokoll definiert. Nach einer Leerzeile folgt ein beliebier Inhalt. Am Ende jeder Zeile folgen die zwei Steuerzeichen "Carriage Return" (`"\r"`) und "Line Feed" (`"\n"`). Diese sind in den Beispielen unten nicht dargestellt.
+
+## Anfrage
 
 Im folgenden Beispiel schickt der Client ein einfaches JSON Dokument an den Server.
 
