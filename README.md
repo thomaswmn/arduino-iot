@@ -1,13 +1,13 @@
 # Übersicht Dokumentation
 
-![Protokoll-Stapel](ProtokollStapel.png)
+![Protokoll-Stapel](docs/ProtokollStapel.png)
 
-* [Aufgabenstellungen](./Aufgabenstellungen.md)
-* [ESP8266](./ESP8266.md)
-* [AT Kommandos](./AT-Commands.md)
-* [HTTP](./HTTP.md)
-* [JSON](./JSON.md)
-* [How to Debug](HowToDebug.md)
+* [Aufgabenstellungen](docs/Aufgabenstellungen.md)
+* [ESP8266](docs/ESP8266.md)
+* [AT Kommandos](docs/AT-Commands.md)
+* [HTTP](docs/HTTP.md)
+* [JSON](docs/JSON.md)
+* [How to Debug](docs/HowToDebug.md)
 
 * Arduino "Progmem" --> siehe [arduino.cc](https://www.arduino.cc/reference/en/language/variables/utilities/progmem/)
 
