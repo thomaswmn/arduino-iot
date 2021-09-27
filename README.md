@@ -2,15 +2,16 @@
 
 ![Protokoll-Stapel](ProtokollStapel.png)
 
-* [How to Start](HowToStart.md)
-* [JSON](./JSON.md)
-* [HTTP](./HTTP.md)
+* [Aufgabenstellung](./Aufgabenstellung.md)
 * [ESP8266](./ESP8266.md)
 * [AT Kommandos](./AT-Commands.md)
+* [HTTP](./HTTP.md)
+* [JSON](./JSON.md)
+* [How to Debug](HowToDebug.md)
 
-* Arduino "Progmem"
+* Arduino "Progmem" --> siehe [arduino.cc](https://www.arduino.cc/reference/en/language/variables/utilities/progmem/)
 
-* SoftSerial --> siehe Abschnitt ESP8266
+* SoftSerial --> siehe [arduino.cc](https://www.arduino.cc/en/Reference/softwareSerial)
 
 * Cloud-Umgebung
     * grober Aufbau?

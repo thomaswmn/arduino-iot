@@ -3,8 +3,12 @@
 
 ## Anpassung Spannungspegel
 
+Weitere Informationen: [ESP8266](ESP8266.md)
+
 * Der ESP8266 arbeitet mit 3,3V. Eingangs-Signale sollten keine höheren Pegel als 3,5V haben. Der Arduino arbeitet mit 5V. Ausgangspegel haben in der Regel entweder 0V oder 5V.
 * Wie können die Spannungspegel durch eine möglichst einfache Schaltung angepasst werden?
+
+![Spannungsteiler](UART_cabling.png)
 
 
 ## Zweite Serielle Schnittstelle am Arduino
@@ -16,6 +20,8 @@
 
 ## Hardware Aufbau
 
+Weitere Informationen: [ESP8266](ESP8266.md)
+
 * Plant den Hardware-Aufbau, erstellt eine Skizze. 
   * Achtet darauf, die Anpassung des Spannungspegels richtig umgesetzt zu haben.
   * Achtet darauf, die richtige Spannungsquelle (3,3V) zu verwenden.
@@ -24,6 +30,8 @@
 
 ## Inbetriebnahme des WLAN Moduls
 
+Weitere Informationen: [AT-Kommandos](AT-COmmands.md)
+
 * Der Arduino soll über die Serielle (Software-) Schnittstelle AT-Kommandos an den ESP8266 senden und Antworten empfangen. Gleichzeitig soll der Arduino über die Serielle (Hardware-) Schnittstelle Debug-Ausgaben an den PC senden.
 * Schreibt eine `setup()` Routine, die erste einfache AT-Kommandos an den ESP8266 schickt.
 * Programmiert den Arduino so, dass alle Rückmeldungen des ESP8266 auch am PC ausgegeben werden. Möglicherweise braucht der ESP8266 etwas Zeit für die Verarbeitung.
@@ -31,6 +39,8 @@
 
 
 ## Konfiguration WLAN
+
+Weitere Informationen: [AT-Kommandos](AT-COmmands.md)
 
 * Der ESP8266 kann so konfiguriert werden, das er sich mit einem WLAN Netz verbindet.
 * Sendet die entsprechenden Konfigurations-Kommandos in euerer `setup()` Routine.
@@ -45,11 +55,26 @@
 * Schreibt ein einfaches Testprogramm. Dies soll einen längeren Text im Programmspeicher ablegen. Beim Start des Arduino soll dieser Text von dort aus auf der Seriellen Schnittstelle zum PC ausgegeben werden.
 
 
+## Erste HTTP Verbindung
+
+Weitere Informationen: [HTTP](HTTP.md)
+
+* Welche Kommandos sind notwendig, um eine Netzwerkverbindung zu öffnen und Daten zu senden?
+* Schreibt ein einfaches Programm, das eine Webseite über HTTP abruft.
+* Kontrolliert die korrekte Funktion, indem ihr die Antworten des ESP8266 über die Konsole des Arduinos anschaut.
+
+
 ## HTTP Verbindung zum Cloud-Server
 
-* t.b..c
+Weitere Informationen: [HTTP](HTTP.md) und [JSON](JSON.md)
 
+* Im nächsten Schritt sollen regelmäßig (z.B. alle 10s) Sensor-Informationen vom Arduino an den Server in der Cloud geschickt werden.
+* Implementiert eine Upload-Funktion, die Daten über HTTP an den Server überträgt.
+* Erstellt einen String, der ein einfaches JSON-Dokument mit den Sensordaten enthält, z.B. `{"value":123.45}`
+* Übertragt regelmäßig die Sensor-Daten an den Server.
+* Kontrolliert die Rückmeldung des ESP8266 über die Konsole des Arduinos.
+* Prüft gemeinsam mit einem der Bosch Mitarbeiter, ob die Daten im Dashboard dargestellt werden.
 
+## Rückmeldung am Arduino
 
-## Auswertung des HTTP Status Code
-
+* Wie kann man am Arduino sichtbar machen, dass die Datenübertragung ins Internet funktioniert?

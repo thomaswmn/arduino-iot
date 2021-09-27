@@ -1,4 +1,4 @@
-# How to Start
+# How to Debug
 
 1. Modul anschließen
      * ist die Verkabelung richtig?
