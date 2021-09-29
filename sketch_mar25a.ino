@@ -51,12 +51,27 @@ const char http_header[] PROGMEM = HTTP_HEADER_1 HTTP_HEADER_2 HTTP_HEADER_3 HTT
 #include "SoftwareSerial.h"
 SoftwareSerial softSerial(SOFTSERIAL_RX_PIN, SOFTSERIAL_TX_PIN); // RX, TX
 
+
 // the receive buffer (to accumulate received data)
 #define REC_BUFLEN 256
 char rec_buf[REC_BUFLEN+1] = {0}; // make the buffer 1 char larger, initialize with 0, so that strstr() comparison never fails
 int rec_buf_idx = 0;
 
+/*
+ * Buffer layout
+ * 
+ *  |<---------------REC_BUFLEN-------------------->|
+ *  
+ * |t h e _ r e c e i v e d _ d a t a 0 0 0 0 0 ... 0 0 |
+ *  ^                                 ^               ^
+ *  |                                 |               |
+ *  rec_buf                        rec_buf_idx      extra "0" never overwritten
+ *  
+ */
+
+
 // last timestamp we detected an HTTP 2xx status code
+// (used to blink "OK" or "error")
 long last_http_ok_time = 0;
 
 /* 
@@ -72,15 +87,20 @@ bool process_rec_buf(bool untilOK, bool untilErr) {
   if(rec_buf_idx == 0) {
     // skip all checks on empty buf
   } else if(untilOK && strncmp(rec_buf, "OK", 2) == 0) {
-    //Serial.println("received \"OK\" --> done");
+    // rec_buf starts with "OK"
     done = true;
   } else if(untilErr && strncmp(rec_buf, "ERROR", 5) == 0) {
-    //Serial.println("received \"ERROR\" --> done");
+    // rec_buf starts with "ERROR"
     done = true;
   } else if (strncmp(rec_buf, "+IPD", 4) == 0) {
     // this is the first line of the HTTP response, where the ESP8266 sends +IPD...
     // find the HTTP return code
+    // the expected line looks like
+    //  "HTTP/1.1 204 No Content"
+    // which means "OK" (a number in the 200 range), and that the server does not send any data back
     char* ptr = strstr(rec_buf, "HTTP/1.1");
+    // now, ptr points to the start of the "HTTP/1.1" part inside the buffer
+    // skip 9 characters, then the number should follow
     int statuscode = atoi(ptr+9);
     if(statuscode >= 200 && statuscode <300) {
       // this is the "OK" range
@@ -125,12 +145,6 @@ void receive_serial_uncond(long duration) {
 
 
 void transmit_serial(const char * data) {
-#ifdef COPY_COMMANDS
-  while(Serial.availableForWrite() < sizeof(data)) {
-    delay(1);
-  }
-  Serial.print(data);
-#endif
   softSerial.print(data);
   receive_serial(1);
 }
@@ -154,12 +168,6 @@ void transmit_header() {
       buf[i] = pgm_read_byte(ptr+i);
     }
     size_t written;
-#ifdef COPY_COMMANDS
-    while(Serial.availableForWrite() < batch) {
-      delay(1);
-    }
-    written = Serial.write(buf, batch);
-#endif
     written = softSerial.write(buf, batch);
     delay(1); // just to be sure...
     ptr += written;
@@ -231,7 +239,7 @@ void setup() {
   // set up LED pin
   pinMode(STATUS_LED_PIN, OUTPUT);
 
-  // configure ESP8266 to use 9600 baud (higher rates not compatible with SoftwareSerial?)
+  // configure ESP8266 to use 9600 baud (higher rates not compatible with SoftwareSerial)
   //softSerial.begin(115200);
   //softSerial.print("AT+CIOBAUD=9600\r\n");
   pinMode(SOFTSERIAL_RX_PIN, INPUT);
@@ -249,8 +257,11 @@ void setup() {
   receive_serial(100);
   transmit_serial("AT+CIPSSLSIZE=4096\r\n"); // set SSL buffer to 4kiB (otherwise we will get errors later)
   receive_serial(100);
-  transmit_serial("AT+CIPRECVMODE=1\r\n"); // set receive mode to active (module does not buffer)
-  receive_serial(100);
+
+  // FIXME braucht man das? 1=passiv, Puffer aktiv, aber nicht relevant für SSL Verbindungen
+  //transmit_serial("AT+CIPRECVMODE=1\r\n"); // set receive mode to active (module does not buffer)
+  //receive_serial(100);
+  
   //transmit_serial("ATE0\r\n"); // disable echo
   //receive_serial(100);
 }
@@ -266,6 +277,7 @@ void transmit_sensor_data() {
 
   // as we transmit now, update the timestamp
   last_transmit_time = now;
+
   
   // prepare the data to be transmitted as JSON
   char buffer[20];
