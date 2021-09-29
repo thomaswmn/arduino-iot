@@ -16,7 +16,6 @@
  * AT+PING                   --> ping
  * AT+CIPRECVDATA            --> get received data
  * AT+CIPSSLSIZE=<size>      --> set SSL buffer size - might be required in case of problems
- * <NTP setup required for SSL?>
  */
 
 
@@ -93,6 +92,8 @@ bool process_rec_buf(bool untilOK, bool untilErr) {
     // rec_buf starts with "ERROR"
     done = true;
   } else if (strncmp(rec_buf, "+IPD", 4) == 0) {
+    // extension required to detect return code from HTTP
+
     // this is the first line of the HTTP response, where the ESP8266 sends +IPD...
     // find the HTTP return code
     // the expected line looks like
@@ -111,6 +112,13 @@ bool process_rec_buf(bool untilOK, bool untilErr) {
   return done;  
 }
 
+/*
+ * Receive data until timeout or "OK" / "ERROR" is received.
+ * Each data byte is also copied to the serial console (to the PC).
+ * 
+ * Detecting OK and ERROR requires the buffer to be used. 
+ * Just waiting for the timeout is easier to implement.
+ */
 void receive_serial_param(long duration, bool untilOK, bool untilErr) {
   long end = millis() + duration;
   char val;
@@ -135,15 +143,17 @@ void receive_serial_param(long duration, bool untilOK, bool untilErr) {
   process_rec_buf(false, false);
 }
 
+/* receive data, until timeout or either "OK" or "ERROR" is received */
 void receive_serial(long duration) {
   receive_serial_param(duration, true, true);
 }
+
+/* receive data until timeout. Ignore "OK" or "ERROR" */
 void receive_serial_uncond(long duration) {
   receive_serial_param(duration, false, false);
 }
 
-
-
+/* transmit the given string and process received data for 1ms */
 void transmit_serial(const char * data) {
   softSerial.print(data);
   receive_serial(1);
@@ -152,33 +162,30 @@ void transmit_serial(const char * data) {
 
 /*
  * transmit the HTTP header. The header is static text stored in flash (not RAM). 
- * Therefore, it has to be copied to RAM first, before it can be transmitted. 
- * To do so, we use this loop with a small buffer. This avoids overflow of the 
- * rather small memory of the Arduino.
- * FIXME: could also read and print byte by byte - should be easier?
- */
-#define HEADER_BUFSIZE 16
+ * Therefore, a special method gpm_read_byte() has to be used to access the array.
+  */
 void transmit_header() {
   const char * ptr = http_header;
-  char buf[HEADER_BUFSIZE];
-  size_t todo = strlen_P(http_header);
+  size_t todo = HTTP_HEADER_LEN;
   while(todo > 0) {
-    size_t batch = min(HEADER_BUFSIZE, todo);
-    for(char i = 0; i < batch; i++) {
-      buf[i] = pgm_read_byte(ptr+i);
-    }
-    size_t written;
-    written = softSerial.write(buf, batch);
-    delay(1); // just to be sure...
-    ptr += written;
-    todo -= written;
+    softSerial.write(pgm_read_byte(ptr));
+    receive_serial(1);
+    ptr += 1;
+    todo -= 1;
   }
 }
 
 
-
+/*
+ * Send the given data string via HTTPS. Initially, the total length is calculated,
+ * because the ESP8266 requires this information when starting to transmit. Then, 
+ * the header and the given data string are transmitted. Finally, the connection
+ * is closed.
+ */
 void ssl_transmit(char * data) {
+  // length of the data string
   int contentLength = strlen(data); 
+  // length of the whole transmission, including HTTP header
   int totalLength = contentLength + HTTP_HEADER_LEN + 18 /* "Content-Length: " + "\r\n" */;
   // account for integer in header with varialbe number of digits
   if(contentLength < 10)
@@ -210,7 +217,7 @@ void ssl_transmit(char * data) {
   // send the header (static part)
   transmit_header();
 
-  // send the last line of the header
+  // send the last line of the header (Content-Length: ...)
   memset(buffer,0,sizeof(buffer));
   snprintf(buffer, 31, "Content-Length: %d\r\n", contentLength);
   transmit_serial(buffer);
@@ -268,7 +275,9 @@ void setup() {
 
 
 long last_transmit_time = 0;
-
+/*
+ * transmit data in case the respective interval has passed. Otherwise, do nothing.
+ */
 void transmit_sensor_data() {
   long now = millis();
   
@@ -289,6 +298,9 @@ void transmit_sensor_data() {
 
 }
 
+/*
+ * blink the LED, depending on the current state (optional extension)
+ */
 void update_status_led() {
   long now = millis();
   bool state_ok = (now - last_http_ok_time < STATUS_WAIT_MILLIS);
@@ -301,6 +313,7 @@ void update_status_led() {
     //Serial.println("status: err");
   }
 }
+
 
 void loop() {
  
