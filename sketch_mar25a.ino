@@ -62,7 +62,7 @@ int rec_buf_idx = 0;
  ***********************************************************/
 
 // when we did not get a "good" status for this time, we blink "error"
-#define STATUS_WAIT_MILLIS 20000
+#define STATUS_WAIT_MILLIS (TRANSMIT_INTERVAL_MILLIS*4)
 #define STATUS_LED_PIN 13
 
 // last timestamp we detected an HTTP 2xx status code
@@ -228,7 +228,8 @@ void ssl_transmit(char * data) {
   // send the content
   transmit_serial(data);
   transmit_serial("\r\n");
-  receive_serial(5000);
+  receive_serial(2000); // wait for this time before closing the connection
+  // note that this does not understand any HTTP response, so waits unconditionally
 
   // close the connection (in case of errors, it is closed by the server; in case all is OK, it is not)
   transmit_serial("AT+CIPCLOSE\r\n");
@@ -317,11 +318,6 @@ void update_status_led() {
 
 
 void loop() {
- 
   transmit_sensor_data();
-
   update_status_led();
-
-  // some delays
-  receive_serial_uncond(10);
 }
