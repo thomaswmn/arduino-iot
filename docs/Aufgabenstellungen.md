@@ -30,38 +30,35 @@ Weitere Informationen: [ESP8266](ESP8266.md)
 
 ## Inbetriebnahme des WLAN Moduls
 
-Weitere Informationen: [AT-Kommandos](AT-COmmands.md)
+Weitere Informationen: [AT-Kommandos](AT-Commands.md)
 
 * Der Arduino soll über die Serielle (Software-) Schnittstelle AT-Kommandos an den ESP8266 senden und Antworten empfangen. Gleichzeitig soll der Arduino über die Serielle (Hardware-) Schnittstelle Debug-Ausgaben an den PC senden.
-* Schreibt eine `setup()` Routine, die erste einfache AT-Kommandos an den ESP8266 schickt.
-* Programmiert den Arduino so, dass alle Rückmeldungen des ESP8266 auch am PC ausgegeben werden. Möglicherweise braucht der ESP8266 etwas Zeit für die Verarbeitung.
-* Testet eure Implemntierung. Funktioniert die Kommunikation mit dem WLAN-Modul?
+* Schreibt eine `setup()` Routine, die die beiden Seriellen Schnittstellen konfiguriert. 
+* Schreibt eine Methode `receive(long duration)`, die für die angegebene Zeit Daten vom ESP8266 empfängt. Jedes Zeichen soll vom Arduino an den PC weitergegeben werden.
+* Sendet in eurer `loop()` Methode wiederholt ein einfaches AT-Kommando an den ESP8266 (mit dem erwarteten Zeilenwechsel, also z.B. `AT+GMR\r\n`). Ruft im Anschluss die vorher implementierte Empfangs-Methode auf, um die Daten entgegenzunehmen.
+* Beachtet, dass der ESP8266 nach jedem Kommando ausreichend Zeit für die Verarbeitung braucht.
+* Testet eure Implementierung. Funktioniert die Kommunikation mit dem WLAN-Modul?
 
 
 ## Konfiguration WLAN
 
-Weitere Informationen: [AT-Kommandos](AT-COmmands.md)
+Weitere Informationen: [AT-Kommandos](AT-Commands.md)
 
 * Der ESP8266 kann so konfiguriert werden, das er sich mit einem WLAN Netz verbindet.
 * Sendet die entsprechenden Konfigurations-Kommandos in euerer `setup()` Routine.
-* Wie könnt ihr testen, das die Verbindung aufgebaut wurde?
-
-
-## Progmem-Speicher für Variablen
-
-* Der Arduino hat 32 kiB Speicher (Flash), in dem das Programm abgelegt wird. Er hat aber nur 2 Kilobyte Arbeitsspeicher (SRAM). In diesem werden alle Variablen und weitere Informationen abgelegt, die sich zur Laufzeit ändern können.
-* Für die Kommunikation mit unserem Server in der Cloud müssen allein für das HTTP-Protokoll 350 bis 400 Byte gesendet werden. Dieser Teil ist statisch, d.h. es wird bei jedem Aufruf der gleiche Text gesendet. Erst danach folgen die veränderlichen Daten. Es ist relativ ineffizient, die statischen Header-Informationen in einer Variable im Arbeitsspeicher abzulegen. 
-* Es gibt die Arduino Library [progmem](https://www.arduino.cc/reference/en/language/variables/utilities/progmem/). Mit dieser können über einfache Hilfsfunktionen unveränderliche Variablen im Programmspeicher abgelegt und von dort gelesen werden.
-* Schreibt ein einfaches Testprogramm. Dies soll einen längeren Text im Programmspeicher ablegen. Beim Start des Arduino soll dieser Text von dort aus auf der Seriellen Schnittstelle zum PC ausgegeben werden.
+* Beachtet, dass der ESP8266 nach jedem Kommando ausreichend Zeit für die Verarbeitung braucht.
+* Wie könnt ihr testen, dass die Verbindung aufgebaut wurde?
 
 
 ## Erste HTTP Verbindung
 
-Weitere Informationen: [HTTP](HTTP.md)
+Weitere Informationen: [AT-Kommandos](AT-Commands.md), [HTTP](HTTP.md)
 
 * Welche Kommandos sind notwendig, um eine Netzwerkverbindung zu öffnen und Daten zu senden?
-* Schreibt ein einfaches Programm, das eine Webseite über HTTP abruft.
+* Schreibt ein einfaches Programm, das eine Webseite über HTTP abruft (z.B. `web.de`)
+* Beachtet, dass ihr in der `setup()` Methode das Kommando `AT+CIPSSLSIZE=4096` ausführt, um einen ausreichend großen Puffer für die SSL Verschlüsselung im ESP8266 zu reservieren.
 * Kontrolliert die korrekte Funktion, indem ihr die Antworten des ESP8266 über die Konsole des Arduinos anschaut.
+
 
 
 ## HTTP Verbindung zum Cloud-Server

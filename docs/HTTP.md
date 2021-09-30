@@ -14,7 +14,7 @@ Im folgenden Beispiel wird eine Webseite abgerufen. Der Client öffnet eine Verb
 
 ```
 GET / HTTP/1.1
-Host: www.wikipedia.de
+Host: web.de
 
 ```
 
@@ -29,31 +29,22 @@ Kurze Erklärung der Zeilen
 Sobald der Server die Anfrage (und die abschließende Leerzeile) erhalten hat, beginnt er diese zu verarbeiten. Die Verbindung bleibt dabei offen. Der Server antwortet dann z.B. mit:
 
 ```
-HTTP/1.1 200 OK
-Server: nginx/1.6.2
-Date: Mon, 27 Sep 2021 19:09:16 GMT
-Content-Type: text/html; charset=UTF-8
-Transfer-Encoding: chunked
-Connection: keep-alive
+HTTP/1.1 200 200
+Date: Thu, 30 Sep 2021 21:51:47 GMT
+Server: Apache
+...
 
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, maximum-scale=1.0, minimum-scale=1.0, initial-scale=1.0" />
-    <title>Wikipedia, die freie Enzyklop&auml;die</title>
+<html xmlns:wicket="http://www.w3.org/1999/xhtml" style="--col-count:4;" data-content-login="">
+  <head>
 ...
 ```
 Erklärung
 * `HTTP/1.1 ...`
     * `HTTP/1.1` ist wieder die Protokoll-Version. Der Server hat also die vom Client gesendete Versionsnummer verstanden und antwortet entsprechend.
     * `200` ist der Status-Code. Zahlen aus dem Bereich 200-299 kennzeichnen Erfolg. Zahlen im Bereich 400-499 bedeuten, dass der Client etwas falsch gemacht hat (z.B. eine ungültige Anfrage, falsches Passwort, ...). Der Bereich 500-599 steht für Fehler auf der Seite des Servers.
-    * `OK` ist eine weitere Erklärung zum Status.
-* `Server:` gibt an, welche Software auf dem Server läuft.
 * `Date:` Datum und Uhrzeit, zu der der Server die Antwort versendet hat.
-* `Content-Type: text/html; charset=UTF-8` gibt an, welches Format an Daten der Server schickt. Hier eine HTML-Seite im Zeichensatz UTF-8.
-* `Transfer-Encoding` und `Connection` dienen der Verbindungsverwaltung zwischen Client und Server. Diese Informationen können hier ignoriert werden.
-* Nach diesen Header-Zeilen folgt eine Leerzeile. Diese zeigt den Beginn der Daten an. Nach der Leerzeile werden die Daten gesendet, hier eine HTML Seite.
+* `Server:` gibt an, welche Software auf dem Server läuft.
+* Nach einigen weiteren Header-Zeilen folgt eine Leerzeile. Diese zeigt den Beginn der Daten an. Nach der Leerzeile werden die Daten gesendet, hier eine HTML Seite.
 
 
 ## Upload von Informationen

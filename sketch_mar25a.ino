@@ -247,9 +247,7 @@ void setup() {
   // set up LED pin
   pinMode(STATUS_LED_PIN, OUTPUT);
 
-  // configure ESP8266 to use 9600 baud (higher rates not compatible with SoftwareSerial)
-  //softSerial.begin(115200);
-  //softSerial.print("AT+CIOBAUD=9600\r\n");
+  // configure the soft-serial
   pinMode(SOFTSERIAL_RX_PIN, INPUT);
   pinMode(SOFTSERIAL_TX_PIN, OUTPUT);
   softSerial.begin(9600);

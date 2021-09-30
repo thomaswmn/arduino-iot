@@ -1,20 +1,9 @@
 #!/bin/bash
 
-devid=test-dev-id
-token="$(./generate_sas_token.py)"
-token="SharedAccessSignature sr=test-bosch-sfp-kos.azure-devices.net%2Fdevices%2Ftest-dev-id&sig=ZGo3kDxXM%2Bdrj49ZiIlbXOJNVxWQpDF0IdWEhvrZW3M%3D&se=1618591213"
-
-#curl \
-#  -v \
-#  -X POST \
-#  -d "$data" \
-#  -H "Content-Type: application/json" \
-#  -H "Authorization: $token" \
-#  https://test-bosch-sfp-kos.azure-devices.net/devices/${devid}/messages/events?api-version=2020-03-13
 
 curl \
   -v \
+  --http1.1 \
   --user-agent "" \
   --header "Accept:" \
-  https://www.wikipedia.de
-  #https://test-bosch-sfp-kos.azure-devices.net?api-version=2020-03-13
+  https://web.de
