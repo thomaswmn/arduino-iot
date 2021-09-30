@@ -1,5 +1,3 @@
-#include <avr/pgmspace.h>
-
 /************************************************************
  * HTTP Header - insert device ID and Shared Access Signature here
  ***********************************************************/
@@ -9,9 +7,8 @@
 #define HTTP_HEADER_3 "Content-Type: application/json\r\n"
 #define HTTP_HEADER_4 "Authorization: SharedAccessSignature sr=test-bosch-sfp-kos.azure-devices.net%2Fdevices%2Ftest-dev-id&sig=bc7aFCapDtR8ZSQxKjlH3vtXR23Eat3WK%2BLXoIRBuL0%3D&se=1633634949\r\n"
 
-const char http_header[] PROGMEM = HTTP_HEADER_1 HTTP_HEADER_2 HTTP_HEADER_3 HTTP_HEADER_4;
-#define HTTP_HEADER_LEN (strlen_P(http_header))
-
+const char http_header[] = HTTP_HEADER_1 HTTP_HEADER_2 HTTP_HEADER_3 HTTP_HEADER_4;
+#define HTTP_HEADER_LEN (strlen(http_header))
 
 /************************************************************
  * Command to start TCP+SSL - contains the host name
@@ -32,7 +29,7 @@ SoftwareSerial softSerial(SOFTSERIAL_RX_PIN, SOFTSERIAL_TX_PIN);
 /************************************************************
  * Buffer for received HTTP data
  ***********************************************************/
-#define REC_BUFLEN 256
+#define REC_BUFLEN 128
 // make the buffer 1 char larger, initialize with 0,
 // so that strstr() comparison never fails
 char rec_buf[REC_BUFLEN+1] = {0}; 
@@ -169,11 +166,11 @@ void transmit_serial(const char * data) {
  * Therefore, a special method gpm_read_byte() has to be used to access the array.
   */
 void transmit_header() {
-  const char * ptr = http_header;
+  size_t idx = 0;
   size_t todo = HTTP_HEADER_LEN;
   while(todo > 0) {
-    softSerial.write(pgm_read_byte(ptr));
-    ptr += 1;
+    softSerial.write(http_header[idx]);
+    idx += 1;
     todo -= 1;
   }
 }
