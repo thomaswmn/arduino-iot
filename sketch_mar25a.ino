@@ -1,59 +1,42 @@
 #include <avr/pgmspace.h>
 
-/**
- * AT commands
- * https://www.espressif.com/sites/default/files/documentation/4a-esp8266_at_instruction_set_en.pdf
- * 
- * AT+UART_DEF=9600,8,1,0,0                                    --> configure UART to 9600 baud, 1 stop bit, no flow control (saved in flash)
- * AT+CWMODE_DEF=1                                             --> set WLAN mode to "station" (saved in flash)
- * AT+CWJAP_DEF="gastnetz@familie-werthmann.de","834534587324" --> set WLAN SSID and password (saved in flash)
- * AT+CIPSSLSIZE=4096                                          --> set SSL buffer to 4kB
- * AT+CIPSTART="SSL","test-bosch-sfp-kos.azure-devices.net",443
- * 
- * AT+CIPSTATUS              --> status of WLAN and TCP connection
- * AT+CIPSTART               --> start TCP / UDP / SSL connection
- * AT+CIPCLOSE               --> close of connection
- * AT+PING                   --> ping
- * AT+CIPRECVDATA            --> get received data
- * AT+CIPSSLSIZE=<size>      --> set SSL buffer size - might be required in case of problems
- */
-
+/************************************************************
+ * HTTP Header - insert device ID and Shared Access Signature here
+ ***********************************************************/
 
 #define HTTP_HEADER_1 "POST /devices/test-dev-id/messages/events?api-version=2020-03-13 HTTP/1.1\r\n"
 #define HTTP_HEADER_2 "Host: test-bosch-sfp-kos.azure-devices.net\r\n"
-#define HTTP_HEADER_3 "User-Agent: Arduino\r\n"
-#define HTTP_HEADER_4 "Accept: */*\r\n"
-#define HTTP_HEADER_5 "Content-Type: application/json\r\n"
-#define HTTP_HEADER_6 "Authorization: SharedAccessSignature sr=test-bosch-sfp-kos.azure-devices.net%2Fdevices%2Ftest-dev-id&sig=XsqoF%2FnRw2LNCSldqOdZtAENokoMv4bWmrJdQRoYfD0%3D&se=1621203903\r\n"
+#define HTTP_HEADER_3 "Content-Type: application/json\r\n"
+#define HTTP_HEADER_4 "Authorization: SharedAccessSignature sr=test-bosch-sfp-kos.azure-devices.net%2Fdevices%2Ftest-dev-id&sig=bc7aFCapDtR8ZSQxKjlH3vtXR23Eat3WK%2BLXoIRBuL0%3D&se=1633634949\r\n"
 
-const char http_header[] PROGMEM = HTTP_HEADER_1 HTTP_HEADER_2 HTTP_HEADER_3 HTTP_HEADER_4 HTTP_HEADER_5 HTTP_HEADER_6; 
+const char http_header[] PROGMEM = HTTP_HEADER_1 HTTP_HEADER_2 HTTP_HEADER_3 HTTP_HEADER_4;
 #define HTTP_HEADER_LEN (strlen_P(http_header))
 
+
+/************************************************************
+ * Command to start TCP+SSL - contains the host name
+ ***********************************************************/
+
 #define CIPSTART "AT+CIPSTART=\"SSL\",\"test-bosch-sfp-kos.azure-devices.net\",443\r\n"
-//#define CIPSTART "AT+CIPSTART=\"TCP\",\"192.168.3.192\",8080\r\n"
 
 
-
-// how often to send data to the cloud?
-#define TRANSMIT_INTERVAL_MILLIS 10000
-
-
-// when we did not get a "good" status for this time, we blink "error"
-#define STATUS_WAIT_MILLIS 20000
-#define STATUS_LED_PIN 13
-
-
-// define the software serial interface
+/************************************************************
+ * Setup of the SoftwareSerial interface
+ ***********************************************************/
 #define SOFTSERIAL_RX_PIN 2
 #define SOFTSERIAL_TX_PIN 3
-//#define _SS_MAX_RX_BUFF 256 // RX buffer size - default 64
 #include "SoftwareSerial.h"
-SoftwareSerial softSerial(SOFTSERIAL_RX_PIN, SOFTSERIAL_TX_PIN); // RX, TX
+SoftwareSerial softSerial(SOFTSERIAL_RX_PIN, SOFTSERIAL_TX_PIN);
 
 
-// the receive buffer (to accumulate received data)
+/************************************************************
+ * Buffer for received HTTP data
+ ***********************************************************/
 #define REC_BUFLEN 256
-char rec_buf[REC_BUFLEN+1] = {0}; // make the buffer 1 char larger, initialize with 0, so that strstr() comparison never fails
+// make the buffer 1 char larger, initialize with 0,
+// so that strstr() comparison never fails
+char rec_buf[REC_BUFLEN+1] = {0}; 
+// index of the next char to be written into the buffer
 int rec_buf_idx = 0;
 
 /*
@@ -64,14 +47,35 @@ int rec_buf_idx = 0;
  * |t h e _ r e c e i v e d _ d a t a 0 0 0 0 0 ... 0 0 |
  *  ^                                 ^               ^
  *  |                                 |               |
- *  rec_buf                        rec_buf_idx      extra "0" never overwritten
+ *  rec_buf               rec_buf+rec_buf_idx      extra "0" never overwritten
  *  
  */
 
 
+/************************************************************
+ * Upload interval
+ ***********************************************************/
+
+// how often to send data to the cloud?
+#define TRANSMIT_INTERVAL_MILLIS 10000
+
+
+/************************************************************
+ * Status LED
+ ***********************************************************/
+
+// when we did not get a "good" status for this time, we blink "error"
+#define STATUS_WAIT_MILLIS 20000
+#define STATUS_LED_PIN 13
+
 // last timestamp we detected an HTTP 2xx status code
 // (used to blink "OK" or "error")
 long last_http_ok_time = 0;
+
+
+
+
+
 
 /* 
  *  called whenever a \n or a \r has been received, or when the buffer needs to be flushed
@@ -81,14 +85,14 @@ long last_http_ok_time = 0;
  *  parameter untilOK --> set done = true if the line starts with "OK"
  *  parameter untilErr --> set done = true if the line starts with "ERROR"
 */
-bool process_rec_buf(bool untilOK, bool untilErr) {
+bool process_rec_buf(bool untilOKErr) {
   bool done = false;
   if(rec_buf_idx == 0) {
     // skip all checks on empty buf
-  } else if(untilOK && strncmp(rec_buf, "OK", 2) == 0) {
+  } else if(untilOKErr && strncmp(rec_buf, "OK", 2) == 0) {
     // rec_buf starts with "OK"
     done = true;
-  } else if(untilErr && strncmp(rec_buf, "ERROR", 5) == 0) {
+  } else if(untilOKErr && strncmp(rec_buf, "ERROR", 5) == 0) {
     // rec_buf starts with "ERROR"
     done = true;
   } else if (strncmp(rec_buf, "+IPD", 4) == 0) {
@@ -119,7 +123,7 @@ bool process_rec_buf(bool untilOK, bool untilErr) {
  * Detecting OK and ERROR requires the buffer to be used. 
  * Just waiting for the timeout is easier to implement.
  */
-void receive_serial_param(long duration, bool untilOK, bool untilErr) {
+void receive_serial_param(long duration, bool untilOKErr) {
   long end = millis() + duration;
   char val;
   bool done = false;
@@ -131,7 +135,7 @@ void receive_serial_param(long duration, bool untilOK, bool untilErr) {
       // check the received data
       if(val == '\r' || val == '\n') {
         // process buffer when the line ends
-        done = process_rec_buf(untilOK, untilErr);
+        done = process_rec_buf(untilOKErr);
       } else if(rec_buf_idx < REC_BUFLEN - 1) {
         // append to buffer (if space left)
         rec_buf[rec_buf_idx++] = val;
@@ -140,17 +144,17 @@ void receive_serial_param(long duration, bool untilOK, bool untilErr) {
   } while(millis() < end && done == false);
   
   // now flush the buffer
-  process_rec_buf(false, false);
+  process_rec_buf(false);
 }
 
 /* receive data, until timeout or either "OK" or "ERROR" is received */
 void receive_serial(long duration) {
-  receive_serial_param(duration, true, true);
+  receive_serial_param(duration, true);
 }
 
 /* receive data until timeout. Ignore "OK" or "ERROR" */
 void receive_serial_uncond(long duration) {
-  receive_serial_param(duration, false, false);
+  receive_serial_param(duration, false);
 }
 
 /* transmit the given string and process received data for 1ms */
@@ -169,7 +173,6 @@ void transmit_header() {
   size_t todo = HTTP_HEADER_LEN;
   while(todo > 0) {
     softSerial.write(pgm_read_byte(ptr));
-    receive_serial(1);
     ptr += 1;
     todo -= 1;
   }
@@ -264,13 +267,6 @@ void setup() {
   receive_serial(100);
   transmit_serial("AT+CIPSSLSIZE=4096\r\n"); // set SSL buffer to 4kiB (otherwise we will get errors later)
   receive_serial(100);
-
-  // FIXME braucht man das? 1=passiv, Puffer aktiv, aber nicht relevant für SSL Verbindungen
-  //transmit_serial("AT+CIPRECVMODE=1\r\n"); // set receive mode to active (module does not buffer)
-  //receive_serial(100);
-  
-  //transmit_serial("ATE0\r\n"); // disable echo
-  //receive_serial(100);
 }
 
 
@@ -287,11 +283,19 @@ void transmit_sensor_data() {
   // as we transmit now, update the timestamp
   last_transmit_time = now;
 
+  // some dummy sensor value as double
+  double value = (1.0/100.0)*(now % 8234);
+  long value_int = (long) value;
+  long value_frac = (long)((value - value_int)*1000);
+  
   
   // prepare the data to be transmitted as JSON
-  char buffer[20];
+  char buffer[64];
   memset(buffer,0,sizeof(buffer));
-  snprintf(buffer,19,"{\"time\":%ld}", millis());
+  snprintf(buffer,sizeof(buffer)-1,"{\"time\":%ld,\"value\":%ld.%ld}", now, value_int, value_frac);
+
+  Serial.print("will send the following JSON object: ");
+  Serial.println(buffer);
 
   // now send it to the Cloud
   ssl_transmit(buffer);
