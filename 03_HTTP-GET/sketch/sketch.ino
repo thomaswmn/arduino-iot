@@ -40,12 +40,12 @@ void setup() {
   receive(2000);
 }
 
-const char http_header[] = "GET / HTTP/1.1\r\n" "Host: web.de\r\n\r\n";
+const char http_header[] = "GET / HTTP/1.1\r\n" "Host: neverssl.com\r\n\r\n";
 
 void loop() {
   // put your main code here, to run repeatedly:
 
-  softSerial.print("AT+CIPSTART=\"SSL\",\"web.de\",443\r\n");
+  softSerial.print("AT+CIPSTART=\"TCP\",\"neverssl.com\",80\r\n");
   receive(2000);
   softSerial.print("AT+CIPSEND=");
   softSerial.print(strlen(http_header));
