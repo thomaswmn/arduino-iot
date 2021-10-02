@@ -1,20 +1,10 @@
 # Aufgabenstellungen
 
 
-## Anpassung Spannungspegel
-
-Weitere Informationen: [ESP8266](ESP8266.md)
-
-* Der ESP8266 arbeitet mit 3,3V. Eingangs-Signale sollten keine höheren Pegel als 3,5V haben. Der Arduino arbeitet mit 5V. Ausgangspegel haben in der Regel entweder 0V oder 5V.
-* Wie können die Spannungspegel durch eine möglichst einfache Schaltung angepasst werden?
-
-![Spannungsteiler](UART_cabling.png)
-
-
 ## Zweite Serielle Schnittstelle am Arduino
 
 * Der Arduino UNO hat (in der Hardware) nur eine serielle Schnittstelle. Diese wird bereits zur Kommunikation mit dem PC genutzt, z.B. um Debug-Meldungen auszugeben. Über die gleiche Schnittstelle kann der ESP8266 daher nicht angeschlossen werden.
-* Schaut euch die Arduino Dokumentation zur Library [SoftwareSerial](https://www.arduino.cc/en/Reference/softwareSerial) an.
+* Schaut euch die Arduino Dokumentation zur Library [SoftwareSerial](./SoftwareSerial.md) an.
 * An welche Pins am Arduino kann das WLAN-Modul angeschlossen werden?
 
 
@@ -23,8 +13,8 @@ Weitere Informationen: [ESP8266](ESP8266.md)
 Weitere Informationen: [ESP8266](ESP8266.md)
 
 * Plant den Hardware-Aufbau, erstellt eine Skizze. 
-  * Achtet darauf, die Anpassung des Spannungspegels richtig umgesetzt zu haben.
-  * Achtet darauf, die richtige Spannungsquelle (3,3V) zu verwenden.
+* Achtet darauf, die Anpassung des Spannungspegels richtig umgesetzt zu haben.
+* Achtet darauf, die richtige Spannungsquelle (3,3V) zu verwenden.
 * Verbindet das Modul wie geplant mit dem Arduino.
 
 
