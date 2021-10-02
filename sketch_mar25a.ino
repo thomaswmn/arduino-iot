@@ -62,7 +62,7 @@ int rec_buf_idx = 0;
  ***********************************************************/
 
 // when we did not get a "good" status for this time, we blink "error"
-#define STATUS_WAIT_MILLIS (TRANSMIT_INTERVAL_MILLIS*4)
+#define STATUS_WAIT_MILLIS (TRANSMIT_INTERVAL_MILLIS*(long)4)
 #define STATUS_LED_PIN 13
 
 // last timestamp we detected an HTTP 2xx status code
@@ -248,8 +248,6 @@ void setup() {
   pinMode(STATUS_LED_PIN, OUTPUT);
 
   // configure the soft-serial
-  pinMode(SOFTSERIAL_RX_PIN, INPUT);
-  pinMode(SOFTSERIAL_TX_PIN, OUTPUT);
   softSerial.begin(9600);
 
   receive_serial(2000);
