@@ -259,6 +259,8 @@ void setup() {
   receive_serial(10000);
   transmit_serial("AT+CWMODE?\r\n"); // ensure that mode is "station"
   receive_serial(100);
+  softSerial.print("AT+CWJAP_DEF=\"Thomass iPhone\",\"passwort\"\r\n");
+  receive_serial(10000);
   transmit_serial("AT+CIPSSLSIZE=4096\r\n"); // set SSL buffer to 4kiB (otherwise we will get errors later)
   receive_serial(100);
 }
@@ -282,11 +284,18 @@ void transmit_sensor_data() {
   long value_int = (long) value;
   long value_frac = (long)((value - value_int)*1000);
   
-  
+  // convert value to string
+  // dtostrf(floatvar, StringLengthIncDecimalPoint, numVarsAfterDecimal, charbuf);
+  char floatString[10];
+  dtostrf(value,4,1,floatString);
+
   // prepare the data to be transmitted as JSON
   char buffer[64];
-  memset(buffer,0,sizeof(buffer));
-  snprintf(buffer,sizeof(buffer)-1,"{\"time\":%ld,\"value\":%ld.%ld}", now, value_int, value_frac);
+  // memset(buffer,0,sizeof(buffer));
+  //snprintf(buffer,sizeof(buffer)-1,"{\"value\":%ld.%ld}", value_int, value_frac);
+  sprintf(buffer,"{\"value\":%05ld}", value_int);
+
+
 
   Serial.print("will send the following JSON object: ");
   Serial.println(buffer);

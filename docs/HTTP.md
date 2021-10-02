@@ -14,7 +14,7 @@ Im folgenden Beispiel wird eine Webseite abgerufen. Der Client öffnet eine Verb
 
 ```
 GET / HTTP/1.1
-Host: web.de
+Host: neverssl.com
 
 ```
 
