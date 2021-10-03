@@ -91,18 +91,18 @@ Weitere Informationen: [HTTP](HTTP.md), [JSON](JSON.md)
 Im nächsten Schritt sollen regelmäßig (z.B. alle 30s) Sensor-Informationen vom Arduino an den Server in der Cloud geschickt werden. Dieser Server erlaubt nur verschlüsselte Verbindungen. 
 
 Unser Server in der Cloud erwartet Daten im JSON-Format. 
-Beispiel: `{"value":00000123}`. Der Wert wird als ganze Zahl erwartet. Damit die Zeichenkette immer gleich lang ist, verwenden wir hier führende Nullen.
+Beispiel: `{"value":     123}`. Der Wert wird als ganze Zahl erwartet. Damit die Zeichenkette immer gleich lang ist, füllen wir mit Leerzeichen auf acht Zeichen auf.
 
 * Ergänzt die `setup()` Methode, so dass diese das Kommando `AT+CIPSSLSIZE=4096` ausführt. Dies reserviert im ESP8266 einen ausreichend großen Puffer für die SSL Verschlüsselung.
 
 * Implementiert eine Methode `upload(long sensorwert)`. Diese bekommt den aktuellen Messwert übergeben. Die Methode soll die Daten über HTTP an den Server übertragen.
 
-  * Erstellt zunächst einen String, der den Sensor-Wert beschreibt. Dazu kann die bereits vorhandene Methode `sprintf(Puffer, Vorlage, Wert)` verwendet werden. `Puffer` ist eine Variable, die auf einen vorher reservierten String-Puffer zeigt. `Vorlage` ist ein Beispiel-String. An der Stelle, an der die Zahl eingefügt werden soll, muss `%08ld` stehen. `Wert` ist eine Variable mit dem Typ `long`.
+  * Erstellt zunächst einen String, der den Sensor-Wert beschreibt. Dazu kann die bereits vorhandene Methode `sprintf(Puffer, Vorlage, Wert)` verwendet werden. `Puffer` ist eine Variable, die auf einen vorher reservierten String-Puffer zeigt. `Vorlage` ist ein Beispiel-String. An der Stelle, an der die Zahl eingefügt werden soll, muss `% 8ld` stehen. `Wert` ist eine Variable mit dem Typ `long`.
 
     ```C++
     long sensorwert = ...
     char buffer[32];
-    sprintf(buffer, "{\"value\":%08ld}", sensorwert);
+    sprintf(buffer, "{\"value\":% 8ld}", sensorwert);
     ```
 
   * Legt fest, welche Device-ID euer Gerät nutzt. Abhängig von der Device-ID muss auch die richtige `SharedAccessSignature` verwendet werden. Fragt die Bosch-Mitarbeiter nach den richtigen Angaben für euer Team.
