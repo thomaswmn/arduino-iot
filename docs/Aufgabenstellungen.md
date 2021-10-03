@@ -26,7 +26,7 @@ In dieser Aufgabe wird der Aufbau der Hardware geplant und umgesetzt.
 
 
 ## 3) Daten weiterleiten
-Weitere Informationen: [SoftwareSerial](./SoftwareSerial.md) 
+Weitere Informationen: [SoftwareSerial](./SoftwareSerial.md), [Referenz millis](https://www.arduino.cc/reference/de/language/functions/time/millis/), [Referenz while](https://www.arduino.cc/reference/en/language/structure/control-structure/while/)
 
 Der Arduino soll über die serielle (Software-) Schnittstelle AT-Kommandos an den ESP8266 senden und Antworten empfangen. Gleichzeitig soll der Arduino über die serielle (Hardware-) Schnittstelle Debug-Ausgaben an den PC senden.
 * Schreibt eine `setup()` Routine, die die beiden seriellen Schnittstellen konfiguriert. 
@@ -120,6 +120,9 @@ Beispiel: `{"value":00000123}`. Der Wert wird als ganze Zahl erwartet. Damit die
 
 * Prüft gemeinsam mit einem der Bosch Mitarbeiter, ob die Daten im Dashboard dargestellt werden.
 
+Hinweise:
+* Zeichenketten wie der Header können in einer Variablen abgelegt werden, z.B. `const char http_header[] = "POST..."`.
+* Die Länge einer Zeichenkette kann über die Methode `strlen(http_header)` abgefragt werden.
 
 ## 8) Rückmeldung des WLAN-Moduls auswerten (optional)
 

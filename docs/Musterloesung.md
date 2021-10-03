@@ -57,13 +57,13 @@ void loop() {
 ## 4) Erste Kommandos an das WLAN Modul
 
 Als Test-Kommando eignen sich z.B.
-    * `AT` --> leeres Kommando, sollte immer `OK` zurückgeben
-    * `AT+RST` --> Neustart des Moduls
-    * `AT+GMR` --> zeigt Versionsinformationen an
-    * `AT+CWMODE?` --> fragt den Geräte-Modus ab 
-    * `AT+CWLAP` --> zeigt eine Liste aller gefundenen WLAN Access Points an
-    * `AT+CWJAP_CUR?` --> zeigt an, zu welchem WLAN Netz das Modul verbunden ist
-    * `AT+CIFSR` --> zeigt die IP-Adresse und die MAC-Adresse des ESP8266 im WLAN an
+* `AT` --> leeres Kommando, sollte immer `OK` zurückgeben
+* `AT+RST` --> Neustart des Moduls
+* `AT+GMR` --> zeigt Versionsinformationen an
+* `AT+CWMODE?` --> fragt den Geräte-Modus ab 
+* `AT+CWLAP` --> zeigt eine Liste aller gefundenen WLAN Access Points an
+* `AT+CWJAP_CUR?` --> zeigt an, zu welchem WLAN Netz das Modul verbunden ist
+* `AT+CIFSR` --> zeigt die IP-Adresse und die MAC-Adresse des ESP8266 im WLAN an
 
 
 Code wie oben, mit der Ergänzung:
@@ -105,6 +105,8 @@ void loop() {
   receive(1000);
 }
 ```
+
+Ausgabe der Konsole beobachten. Aufbau der WIFI-Verbindung wird i.d.R. auch ohne die Test-Kommandos anzgezeigt.
 
 ## 6) Erste HTTP Verbindung
 
@@ -166,6 +168,8 @@ void httpGet() {
   ...
 }
 ```
+
+Konsole beobachten. Es sollte eine HTML-Seite mit einer Bildschrimseite Inhalts-Text ausgegeben werden.
 
 ## 7) HTTP Verbindung zum Cloud-Server
 
