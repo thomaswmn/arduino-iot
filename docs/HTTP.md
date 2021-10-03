@@ -58,7 +58,7 @@ Content-Type: application/json
 Authorization: SharedAccessSignature ...
 Content-Length: 12
 
-{"test":"1"}
+{"test":001}
 ```
 
 Kurze Erklärung der Zeilen
@@ -71,7 +71,7 @@ Kurze Erklärung der Zeilen
 * `Authorization:` ist eine Art Passwort. Der Server verarbeitet die Anfrage nur, wenn hier ein gültiger Text gesendet wird.
 * `Content-Length:` ist die Länge des Dokuments, das der Client zum Server schickt (in Bytes).
 * Die Leerzeile markiert das Ende der HTTP Protokoll-Informationen. Nach der Leerzeile folgt das Dokument.
-* Die Zeile `{"test":"1"}` ist das Dokument, das der Client zum Server schickt. Der String ist 12 Zeichen lang.
+* Die Zeile `{"test":001}` ist das Dokument, das der Client zum Server schickt. Der String ist 12 Zeichen lang.
 
 Sobald der Server die angekündigten 12 Bytes empfangen hat, wird die Anfrage bearbeitet. Die Verbindung bleibt dabei offen. Dann antwortet der Server, z.B. so:
 

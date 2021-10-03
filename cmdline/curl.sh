@@ -23,3 +23,4 @@ curl \
   -H "Content-Type: application/json" \
   -H "Authorization: $token" \
   https://test-bosch-sfp-kos.azure-devices.net/devices/${devid}/messages/events?api-version=2020-03-13
+echo -n $data | wc -c

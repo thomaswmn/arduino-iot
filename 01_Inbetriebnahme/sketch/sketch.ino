@@ -1,3 +1,4 @@
+
 /************************************************************
  * Setup of the SoftwareSerial interface
  ***********************************************************/
@@ -28,8 +29,6 @@ void setup() {
   Serial.println("startup...");
 
   // configure the soft-serial
-  pinMode(SOFTSERIAL_RX_PIN, INPUT);
-  pinMode(SOFTSERIAL_TX_PIN, OUTPUT);
   softSerial.begin(9600);
 
   softSerial.print("AT+RST\r\n");
