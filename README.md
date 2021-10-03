@@ -9,11 +9,7 @@
 * [HTTP](docs/HTTP.md)
 * [JSON](docs/JSON.md)
 * [How to Debug](docs/HowToDebug.md)
+* [Cloud-Umgebung](docs/Cloud.md)
 
-* TODO: Cloud-Umgebung
-    * grober Aufbau?
-    * Erwartete Daten
-    * Authentifizierung
-    
 * [Firmware-flashing ESP8266](docs/Firmware.md)
 
