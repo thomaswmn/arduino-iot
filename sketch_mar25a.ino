@@ -293,7 +293,7 @@ void transmit_sensor_data() {
   char buffer[64];
   // memset(buffer,0,sizeof(buffer));
   //snprintf(buffer,sizeof(buffer)-1,"{\"value\":%ld.%ld}", value_int, value_frac);
-  sprintf(buffer,"{\"value\":%05ld}", value_int);
+  sprintf(buffer,"{\"value\":% 8ld}", value_int);
 
 
 
