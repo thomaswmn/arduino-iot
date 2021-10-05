@@ -175,7 +175,7 @@ Konsole beobachten. Es sollte eine HTML-Seite mit einer Bildschrimseite Inhalts-
 
 Device-ID aus der Liste oder von uns angegeben. SharedAccessSignature muss passen.
 
-Content-Length ist immer 18 Zeichen, durch die führenden Nullen ist die Länge konstant: `{"value":00000123}`
+Content-Length ist immer 18 Zeichen, durch die führenden Leerzeichen ist die Länge konstant: `{"value":     123}`
 
 ```C++
 void setup() {
@@ -192,7 +192,7 @@ const char http_header[] = "POST /devices/test-dev-id/messages/events?api-versio
       
 void upload(long sensorwert) {
   char buffer[32];
-  sprintf(buffer, "{\"value\":%08ld}", sensorwert); // 18 Zeichen
+  sprintf(buffer, "{\"value\":% 8ld}", sensorwert); // 18 Zeichen
 
   softSerial.print("AT+CIPSTART=\"SSL\",\"test-bosch-sfp-kos.azure-devices.net\",443\r\n");
   receive(2000);
