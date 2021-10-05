@@ -29,11 +29,13 @@ In dieser Aufgabe wird der Aufbau der Hardware geplant und umgesetzt.
 Weitere Informationen: [SoftwareSerial](./SoftwareSerial.md), [Referenz millis](https://www.arduino.cc/reference/de/language/functions/time/millis/), [Referenz while](https://www.arduino.cc/reference/en/language/structure/control-structure/while/)
 
 Der Arduino soll über die serielle (Software-) Schnittstelle AT-Kommandos an den ESP8266 senden und Antworten empfangen. Gleichzeitig soll der Arduino über die serielle (Hardware-) Schnittstelle Debug-Ausgaben an den PC senden.
+
 * Schreibt eine `setup()` Routine, die die beiden seriellen Schnittstellen konfiguriert. 
 * Welche weiteren Ergänzungen sind notwendig, um die SoftwareSerial Library zu nutzen?
 * Schreibt eine Methode `receive(long duration)` mit dem Parameter `duration` in Millisekunden. Diese soll für die angegebene Zeit Daten vom ESP8266 empfangen. Jedes Zeichen soll vom Arduino an den PC weitergegeben werden. 
 
 Hinweise:
+
 * Orientiert euch am Beispiel zur [SoftwareSerial](./SoftwareSerial.md) Library.
 * Versucht, die Methode `delay()` nicht zu verwenden.
 * Die aktuelle "Uhrzeit" kann über die Methode `millis()` abgefragt werden. Diese Methode gibt die Zeit seit  dem Start des Arduinos in Millisekunden zurück.
@@ -63,8 +65,9 @@ In dieser Aufgabe soll sich das WLAN-Modul mit einem WLAN verbinden.
 * Wie könnt ihr testen, dass die Verbindung aufgebaut wurde?
 
 Hinweis:
+
 * Manche Kommandos an das WLAN-Modul enthalten Anführungszeichen. Diese müssen beim Programmieren durch einen vorgestellten Backslash (\\) maskiert ("versteckt") werden. Anderenfalls werden sie als Ende der Zeichenkette verstanden. 
-* Beispiel: `const char cmd[] = "AT+CWJAP_DEF=\"Netzname\",\"Passwort\"\r\n");`
+* Beispiel: `print("AT+CWJAP_DEF=\"Netzname\",\"Passwort\"\r\n");`
 
 ## 6) Erste HTTP Verbindung
 
@@ -78,6 +81,7 @@ In dieser Aufgabe soll eine Internet-Verbindung genutzt werden, um eine Webseite
 * Kontrolliert die korrekte Funktion, indem ihr die Antworten des ESP8266 über die Konsole des Arduinos anschaut.
 
 Hinweise:
+
 * Viele Webseiten bieten mittlerweile nur noch verschlüsselte Verbindungen an. Verwendet hier die eine unverschlüsselte Webseite, z.B. `neverssl.com`.
 * Der ESP8266 unterstützt unverschlüsselte Verbindungen (Parameter `TCP`) und verschlüsselte Verbindungen (Parameter `SSL`). Für den unverschlüsselten Abruf von Webseiten wird Port 80 verwendet. Für verschlüsselte Webseiten nutzt man Port 443. Siehe Beispiele in [AT-Kommandos](AT-Commands.md).
 * Beachtet, dass der Zeilenwechsel in HTTP aus den beiden Zeichen `\r\n` besteht. Die Leerzeile am Ende der Anfrage muss mit übertragen werden. Dazu werden einfach zwei Zeilenwechsel nacheinander gesendet: `\r\n\r\n`
@@ -121,6 +125,7 @@ Beispiel: `{"value":00000123}`. Der Wert wird als ganze Zahl erwartet. Damit die
 * Prüft gemeinsam mit einem der Bosch Mitarbeiter, ob die Daten im Dashboard dargestellt werden.
 
 Hinweise:
+
 * Zeichenketten wie der Header können in einer Variablen abgelegt werden, z.B. `const char http_header[] = "POST..."`.
 * Die Länge einer Zeichenkette kann über die Methode `strlen(http_header)` abgefragt werden.
 

@@ -57,13 +57,14 @@ void loop() {
 ## 4) Erste Kommandos an das WLAN Modul
 
 Als Test-Kommando eignen sich z.B.
-* `AT` --> leeres Kommando, sollte immer `OK` zurückgeben
-* `AT+RST` --> Neustart des Moduls
-* `AT+GMR` --> zeigt Versionsinformationen an
-* `AT+CWMODE?` --> fragt den Geräte-Modus ab 
-* `AT+CWLAP` --> zeigt eine Liste aller gefundenen WLAN Access Points an
-* `AT+CWJAP_CUR?` --> zeigt an, zu welchem WLAN Netz das Modul verbunden ist
-* `AT+CIFSR` --> zeigt die IP-Adresse und die MAC-Adresse des ESP8266 im WLAN an
+
+ * `AT` --> leeres Kommando, sollte immer `OK` zurückgeben
+ * `AT+RST` --> Neustart des Moduls
+ * `AT+GMR` --> zeigt Versionsinformationen an
+ * `AT+CWMODE?` --> fragt den Geräte-Modus ab 
+ * `AT+CWLAP` --> zeigt eine Liste aller gefundenen WLAN Access Points an
+ * `AT+CWJAP_CUR?` --> zeigt an, zu welchem WLAN Netz das Modul verbunden ist
+ * `AT+CIFSR` --> zeigt die IP-Adresse und die MAC-Adresse des ESP8266 im WLAN an
 
 
 Code wie oben, mit der Ergänzung:
@@ -81,10 +82,12 @@ In der Arduino-Software den seriellen Monitor öffnen (im Menü Werkzeuge). Es s
 ## 5) Konfiguration WLAN
 
 Kommando für die WLAN-Konfiguration: (eins von beiden, besser das mit `_DEF`)
+
 * `AT+CWJAP_CUR="Netz","Passwort"` --> konfiguriert das Modul für eine Verbindung mit einem WLAN Netz "Netz" mit dem Passwort "Passwort".
 * `AT+CWJAP_DEF="Netz","Passwort"` --> wie `AT+CWJAP_CUR`, aber die Konfiguration wird im Modul gespeichert.
 
 Kommandos zum Testen:
+
 * `AT+CWJAP_CUR?` --> zeigt an, zu welchem WLAN Netz das Modul verbunden ist
 * `AT+CIFSR` --> zeigt die IP-Adresse und die MAC-Adresse des ESP8266 im WLAN an
 * `AT+PING=<IP>` --> sendet ein "ping" Paket an die angegebene Adresse. Es werden auch Host-Namen unterstützt.
@@ -111,6 +114,7 @@ Ausgabe der Konsole beobachten. Aufbau der WIFI-Verbindung wird i.d.R. auch ohne
 ## 6) Erste HTTP Verbindung
 
 Kommandos um Daten zu übertragen (aus der Dokumentation [AT-Kommandos](AT-Commands.md), ganz unten):
+
 1. `AT+CIPSTART... `
 1. warten, bis die Verbindung aufgebaut ist
 1. `AT+CIPSEND=AnzahlBytes`
@@ -184,10 +188,11 @@ void setup() {
   receive(2000);
 }
 
-const char http_header[] = "POST /devices/test-dev-id/messages/events?api-version=2020-03-13 HTTP/1.1\r\n"
+const char http_header[] = "POST /devices/test-dev-id/messages/events"
+      "?api-version=2020-03-13 HTTP/1.1\r\n"
       "Host: test-bosch-sfp-kos.azure-devices.net\r\n"
       "Content-Type: application/json\r\n"
-      "Authorization: SharedAccessSignature sr=test-bosch-sfp-kos.azure-devices.net%2Fdevices%2Ftest-dev-id&sig=bc7aFCapDtR8ZSQxKjlH3vtXR23Eat3WK%2BLXoIRBuL0%3D&se=1633634949\r\n"
+      "Authorization: SharedAccessSignature sr=test-bosch-sfp-kos....\r\n"
       "Content-Length: 18\r\n\r\n";
       
 void upload(long sensorwert) {

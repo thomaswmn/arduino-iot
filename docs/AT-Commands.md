@@ -12,23 +12,27 @@ Die hier zusammenfassend erklärten Befehle stammen aus dem [Handbuch](https://w
 
 
 Einfache Abfragen
+
 * `AT` --> leeres Kommando, sollte immer `OK` zurückgeben
 * `AT+RST` --> Neustart des Moduls
 * `AT+GMR` --> zeigt Versionsinformationen an
 
 Konfiguration
+
 * `AT+CWMODE_DEF=1` --> setzt den Geräte-Modus auf "Client". Wird im Modul gespeichert.
 * `AT+CWJAP_CUR="Netz","Passwort"` --> konfiguriert das Modul für eine Verbindung mit einem WLAN Netz "Netz" mit dem Passwort "Passwort".
 * `AT+CWJAP_DEF="Netz","Passwort"` --> wie `AT+CWJAP_CUR`, aber die Konfiguration wird im Modul gespeichert.
 * `AT+CIPSSLSIZE=4096` --> konfiguriert die Größe eines Puffers im WLAN-Adapter, hier auf 4kiB. Nötig wenn man über SSL kommuniziert. Kleinere Puffer führen zu Fehlern bei der Datenverarbeitung. Größere Puffer können das Modul instabil machen.
 
 Datenübertragung
+
 * `AT+CIPSTART="TCP","neverssl.com",80` --> öffnet eine neue TCP Verbindung ohne SSL Verschlüsselung. Das Zielsystem ist `neverssl.com`. Der Ziel-Port ist 80 (HTTP unverschlüsselt).
 * `AT+CIPSTART="SSL","test-bosch-sfp-kos.azure-devices.net",443` --> öffnet eine neue TCP Verbindung mit SSL Verschlüsselung. Das Zielsystem ist `test-bosch-sfp-kos.azure-devices.net`. Der Ziel-Port ist 443 (HTTPS, also HTTP verschlüsselt).
 * `AT+CIPCLOSE` --> beendet eine bestehende TCP-Verbindung
 * `AT+CIPSEND=123` --> Beginnt die Datenübertragung. Hier werden 123 Bytes gesendet. Nach kurzer Wartezeit können die Daten geschickt werden. Sobald die angekündigte Anzahl Bytes übertragen wurden, ist das Modul wieder bereit für neue AT-Kommandos.
 
 Netzwerk Infos
+
 * `AT+CWMODE?` --> fragt den Geräte-Modus ab (1=Client, 2=Access Point, 3=beides)
 * `AT+CWLAP` --> zeigt eine Liste aller gefundenen WLAN Access Points an
 * `AT+CWJAP_CUR?` --> zeigt an, zu welchem WLAN Netz das Modul verbunden ist

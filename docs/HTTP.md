@@ -19,6 +19,7 @@ Host: neverssl.com
 ```
 
 Kurze Erklärung der Zeilen
+
 * `GET / HTTP/1.1`
     * `GET` ist die HTTP Methode. `GET` bedeutet, dass Daten heruntergeladen (abgerufen) werden.
     * `/` ist der Pfad des Dokuments auf dem Server, das abgerufen wird. Hier fragt der Client nach dem "obersten" Verzeichnis.
@@ -38,7 +39,9 @@ Server: Apache
   <head>
 ...
 ```
+
 Erklärung
+
 * `HTTP/1.1 ...`
     * `HTTP/1.1` ist wieder die Protokoll-Version. Der Server hat also die vom Client gesendete Versionsnummer verstanden und antwortet entsprechend.
     * `200` ist der Status-Code. Zahlen aus dem Bereich 200-299 kennzeichnen Erfolg. Zahlen im Bereich 400-499 bedeuten, dass der Client etwas falsch gemacht hat (z.B. eine ungültige Anfrage, falsches Passwort, ...). Der Bereich 500-599 steht für Fehler auf der Seite des Servers.
@@ -61,7 +64,8 @@ Content-Length: 12
 {"test":001}
 ```
 
-Kurze Erklärung der Zeilen
+Erklärung 
+
 * `POST /device/... HTTP/1.1`
     * `POST` ist die HTTP Methode. `POST` bedeutet, dass Daten gesendet werden ("upload"). 
     * `/device/... ` ist der Pfad des Dokuments auf dem Server, für das die Daten bestimmt sind. Hier nicht wirklich ein Dokument, sondern stattdessen nutzt der Server diesen Teil, um zwischen verschiedenen Geräten (hier `test-dev-id`) und Funktionen zu unterscheiden.
@@ -86,6 +90,7 @@ Date: Sat, 11 Sep 2021 07:17:35 GMT
 ```
 
 Erklärung
+
 * `HTTP/1.1 ...`
     * `HTTP/1.1` ist wieder die Protokoll-Version. Der Server hat also die vom Client gesendete Versionsnummer verstanden und antwortet entsprechend.
     * `204` ist der Status-Code. Zahlen aus dem Bereich 200-299 kennzeichnen Erfolg. Zahlen im Bereich 400-499 bedeuten, dass der Client etwas falsch gemacht hat (z.B. eine ungültige Anfrage, falsches Passwort, ...). Der Bereich 500-599 steht für Fehler auf der Seite des Servers.
